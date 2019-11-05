@@ -4,6 +4,7 @@ $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
 $config = [
+    'language'=>'ru_RU',
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
@@ -12,6 +13,14 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
+        'activity'=>[
+            'class'=>\app\components\ActivityComponent::class,
+            'modelClass' => \app\models\Activity::class
+        ],
+        'day'=>[
+            'class'=>\app\components\DayComponent::class,
+            'modelClass' => \app\models\Day::class
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'CKyZl2_mSQt54hRnGPCY5Mi8IZTzLb76',
