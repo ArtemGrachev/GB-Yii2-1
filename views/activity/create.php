@@ -17,7 +17,16 @@
         <?=$form->field($model,'timeStart')->input('time');?>
         <?=$form->field($model,'timeFinish')->input('time');?>
         <?=$form->field($model,'isBlocked')->checkbox()?>
-        <?=$form->field($model,'repeat')->dropDownList($repeatValues)?>
+        <?=$form->field($model,'repeat', [
+            'inputOptions' => [
+                'data_block' => 'select',
+            ],
+        ])->dropDownList($repeatValues)?>
+        <?=$form->field($model,'dateFinish', [
+            'inputOptions' => [
+                'data_blocked' => 'select',
+            ],
+        ])->input('date');?>
         <?=$form->field($model,'files[]')->fileInput(['multiple' => true, 'accept' => 'image/*'])?>
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Сохранить</button>

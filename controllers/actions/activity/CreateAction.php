@@ -22,23 +22,12 @@ class CreateAction extends BaseAction
                 \Yii::$app->response->format=Response::FORMAT_JSON;
                 return ActiveForm::validate($model);
             }
-            if (!\Yii::$app->activity->createActivity($model)) {
-                foreach ($this->files as $file) {
-                    $comp->saveFile($file);
-                }
-                print_r($model->getErrors());
+            if ($idAct = \Yii::$app->activity->createActivity($model)) {
+                return $this->controller->render('watch',['model'=>$model, 'repeatValues' => $model::REPEAT_VALUES, 'id' => $idAct]);
             } else {
-                return $this->controller->render('watch',['model'=>$model, 'repeatValues' => $model::REPEAT_VALUES]);
+                print_r($model->getErrors());
             }
         }
         return $this->controller->render('create', ['model' => $model, 'repeatValues' => $model::REPEAT_VALUES]);
     }
-}
-
-
-if ($this->validate()) {
-
-    return true;
-} else {
-    return false;
 }

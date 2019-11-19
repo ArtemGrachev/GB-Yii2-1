@@ -52,6 +52,11 @@ class Activity extends Base
             }, 'enableAjaxValidation' => true,'enableClientValidation' => false],
             ['isBlocked', 'boolean'],
             ['repeat', 'string', 'in', 'range' => array_keys(self::REPEAT_VALUES)],
+            ['dateFinish', 'required', 'date', 'format' => 'php:Y-m-d', function(){
+                if (($this->dateStart !== 'no') && (strtotime($this->dateStart) >= strtotime($this->dateFinish))) {
+                    $this->addErrors(['dateStart', 'dateFinish'], 'Дата окончания должна быть больше даты начала.');
+                }
+            }, 'enableAjaxValidation' => true,'enableClientValidation' => false],
             ['files', 'file', 'skipOnEmpty' => false, 'extensions' => ['jpg', 'png'], 'maxFiles' => 10, 'checkExtensionByMimeType'=>false],
         ];
     }
@@ -59,14 +64,15 @@ class Activity extends Base
     public function attributeLabels()
     {
         return [
-            'title'=>'Заголовок',
-            'description'=>'Описание',
-            'date'=>'Дата',
-            'timeStart'=>'Время начала',
-            'timeFinish'=>'Время окончания',
-            'isBlocked'=>'Блокирующее событие',
-            'repeat'=>'Повторяется',
-            'files'=>'Файлы'
+            'title' => 'Заголовок',
+            'description' => 'Описание',
+            'date' => 'Дата',
+            'timeStart' => 'Время начала',
+            'timeFinish' => 'Время окончания',
+            'isBlocked' => 'Блокирующее событие',
+            'repeat' => 'Повторяется',
+            'dateFinish' => 'Повторять до',
+            'files' => 'Файлы'
         ];
     }
 }

@@ -25,54 +25,58 @@ class ActivityComponent extends BaseComponent
         $activity->file = UploadedFile::getInstances($activity, 'file');
         if ($activity->validate()) {
             if ($activity->file) {
-                $activity->file = $this->saveFile($activity->file);
+                $activity->file = (new FileComponent())->saveFile($activity->file);
                 if (!$activity->file) {
                     return false;
                 }
             }
-            return true;
+            $this->insert('activity',[
+                'title'=>$activity->title,
+                'description'=>$activity->description,
+                'timeStart'=>$activity->date.' '.$activity->timeStart,
+                'timeFinish'=>$activity->date.' '.$activity->timeFinish,
+                'isBlocked'=>(($activity->isBlocked) ? 1 : 0),
+                'files'=>$activity->files,
+                'userID'=>1 // !!!!!!!!!!!
+            ]);
+            if ($activity->repeat) {
+
+            }
+
+
+
+
+
+        <?=$form->field($model,'title');?>
+        <?=$form->field($model,'description')->textarea(['data-des'=>22]);?>
+        <?=$form->field($model,'date')->input('date');?>
+        <?=$form->field($model,'timeStart')->input('time');?>
+        <?=$form->field($model,'timeFinish')->input('time');?>
+        <?=$form->field($model,'isBlocked')->checkbox()?>
+        <?=$form->field($model,'repeat')->dropDownList($repeatValues)?>
+        <?=$form->field($model,'files[]')->fileInput(['multiple' => true, 'accept' => 'image/*'])?>
+
+
+
+
+            $this->createTable('activity',[
+                'id'=>$this->primaryKey(),
+                'title'=>$this->string(150)->notNull(),
+                'description'=>$this->text(),
+                'timeStart'=>$this->dateTime()->notNull(),
+                'timeFinish'=>$this->dateTime()->notNull(),
+                'isBlocked'=>$this->boolean()->notNull()->defaultValue(0),
+                'createdAt'=>$this->timestamp()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
+                'files'=>$this->text()->defaultValue('a:0:{}'),
+                'userID'=>$this->integer()->notNull()
+            ]);
+
+
+
+            return $id;
         }
         return false;
     }
 
-    /** Сохранение файла
-     * @param UploadedFile $file
-     * @return string|null
-     * @throws \yii\base\Exception
-     */
-    private function saveFile(UploadedFile $file): ?string
-    {
-        $name = $this->genFileName($file);
-        $path = $this->getPathToSave() . $name;
-        if ($file->saveAs($path)) {
-            return $name;
-        }
-        return null;
-    }
 
-    /** Путь для сохранения файлов, загруженных пользователями
-     * @return bool|string
-     * @throws \yii\base\Exception
-     */
-    private function getPathToSave()
-    {
-        $path = \Yii::getAlias('@webroot/files/');
-        FileHelper::createDirectory($path);
-        return $path;
-    }
-
-    /** Генерирует название файла перед сохранением
-     * @param UploadedFile $file
-     * @return string
-     * @throws \yii\base\Exception
-     */
-    private function genFileName(UploadedFile $file)
-    {
-        $time = time();
-        do {
-            $fileName = $time . "_" . $file->getBaseName() . '.' . $file->getExtension();
-            $time--;
-        } while (file_exists($this->getPathToSave().$fileName));
-        return $fileName;
-    }
 }

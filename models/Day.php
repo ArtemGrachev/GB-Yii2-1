@@ -10,7 +10,8 @@ class Day extends Base
 {
     public $date;
     //new Day(['date'=>'value'])
-    public $timestamp;
+    public $timestampStart;
+    public $timestampFinish;
     public $dateArr;
     public $activities;
     public $dayOfWeek;

@@ -76,11 +76,16 @@ class DayComponent extends BaseComponent
      */
     public function today(Day $day) {
         $this->testDate($day);
-        $day->timestamp = strtotime($day->date);
+        $day->timestampStart = strtotime($day->date);
+        $day->timestampFinish = $day->timestampStart + 24*60*60 - 1;
         $day->dateArr = date_parse($day->date);
         $day->activities = $this->getActivitesByDay($day);
         $day->dayOfWeek = $this->getDayRus($day->timestamp);
         $day->isWeekend = in_array($day->dayOfWeek, ['Суббота', 'Воскресенье']);
         return $day;
+    }
+
+    public function fieldToTimestamp($day, $time) {
+        date();
     }
 }
