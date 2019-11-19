@@ -13,13 +13,16 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
-        'activity'=>[
-            'class'=>\app\components\ActivityComponent::class,
+        'activity' => [
+            'class' => \app\components\ActivityComponent::class,
             'modelClass' => \app\models\Activity::class
         ],
-        'day'=>[
-            'class'=>\app\components\DayComponent::class,
+        'day' => [
+            'class' => \app\components\DayComponent::class,
             'modelClass' => \app\models\Day::class
+        ],
+        'st' => [
+            'class' => \app\components\StComponent::class,
         ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation

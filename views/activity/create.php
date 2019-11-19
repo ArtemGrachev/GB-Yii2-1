@@ -2,7 +2,7 @@
 /**
  * @var $model \app\models\Activity
  * @var $success - успешная обработка формы
- */
+ * @var $repeatValues - массив значений для выпадающего списка */
 ?>
 <h1>Новая активность</h1>
 <?php if ($success): ?>
@@ -17,15 +17,17 @@
         <?=$form->field($model,'timeStart')->input('time');?>
         <?=$form->field($model,'timeFinish')->input('time');?>
         <?=$form->field($model,'isBlocked')->checkbox()?>
-        <?=$form->field($model,'repeat')->dropDownList([
-            'no' => 'Не повторяется',
-            'daily' => 'Ежедневно',
-            'second' => 'Раз в два дня',
-            'weekpart' => 'По будням/по выходным',
-            'weekly' => 'Раз в неделю',
-            'monthly' => 'Раз в месяц',
-            'yearly' => 'Раз в год'
-        ])?>
+        <?=$form->field($model,'repeat', [
+            'inputOptions' => [
+                'data_block' => 'select',
+            ],
+        ])->dropDownList($repeatValues)?>
+        <?=$form->field($model,'dateFinish', [
+            'inputOptions' => [
+                'data_blocked' => 'select',
+            ],
+        ])->input('date');?>
+        <?=$form->field($model,'files[]')->fileInput(['multiple' => true, 'accept' => 'image/*'])?>
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Сохранить</button>
         </div>
