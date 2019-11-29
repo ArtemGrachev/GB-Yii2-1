@@ -4,6 +4,10 @@
 namespace app\models;
 
 
+use app\components\DayComponent;
+use app\models\rules\BlackListRule;
+use Yii;
+
 class Activity extends Base
 {
     public $title;
@@ -13,6 +17,7 @@ class Activity extends Base
     public $timeFinish;
     public $isBlocked;
     public $repeat;
+    public $dateFinish;
     public $files;
 
     const REPEAT_VALUES = [
@@ -25,14 +30,20 @@ class Activity extends Base
         'yearly' => 'Раз в год'
     ];
 
-    public function beforeValidate()
-    {
-        if (!empty($this->date)) {
-            $date = \DateTime::createFromFormat('d.m.Y', $this->date);
-            if ($date) {
-                $this->date = $date->format('Y-m-d');
+    public function dateFormat($date) {
+        if (!empty($date)) {
+            $dateCreated = \DateTime::createFromFormat('d.m.Y', $date);
+            if ($dateCreated) {
+                return $dateCreated->format('Y-m-d');
             }
         }
+        return null;
+    }
+
+    public function beforeValidate()
+    {
+        $this->date = $this->dateFormat($this->date);
+        $this->dateFinish = $this->dateFormat($this->dateFinish);
         return parent::beforeValidate();
     }
 
@@ -42,23 +53,67 @@ class Activity extends Base
     public function rules()
     {
         return [
-            ['title', 'required', 'string', 'trim', 'max' => 30, 'min' => 5, BlackListRule::class, 'enableAjaxValidation' => true,'enableClientValidation' => false],
-            ['description', 'string', 'max' => 250, BlackListRule::class, 'enableAjaxValidation' => true,'enableClientValidation' => false],
-            ['date', 'required', 'date', 'format' => 'php:Y-m-d'],
-            [['timeStart', 'timeFinish'], 'required', 'time', function(){
+            ['title', 'trim'],
+            [['title', 'timeStart', 'timeFinish', 'repeat'], 'required'],
+            ['title', 'string', 'length' => [5, 30]],
+            ['description', 'string', 'max' => 250],
+            [['title', 'description'], BlackListRule::class],
+            [['date', 'dateFinish'], 'date', 'format' => 'php:Y-m-d'],
+            ['date', 'checkDate'],
+            [['timeStart', 'timeFinish'], 'time', 'format' => 'php:H:i'],
+            [['timeStart', 'timeFinish'], function(){
                 if(strtotime($this->timeStart) >= strtotime($this->timeFinish)) {
                     $this->addErrors(['timeStart', 'timeFinish'], 'Время окончания должно быть больше времени начала.');
                 }
-            }, 'enableAjaxValidation' => true,'enableClientValidation' => false],
+            }],
             ['isBlocked', 'boolean'],
-            ['repeat', 'string', 'in', 'range' => array_keys(self::REPEAT_VALUES)],
-            ['dateFinish', 'required', 'date', 'format' => 'php:Y-m-d', function(){
-                if (($this->dateStart !== 'no') && (strtotime($this->dateStart) >= strtotime($this->dateFinish))) {
-                    $this->addErrors(['dateStart', 'dateFinish'], 'Дата окончания должна быть больше даты начала.');
+            ['repeat', 'in', 'range' => array_keys(self::REPEAT_VALUES)],
+            ['dateFinish', 'required', 'when' => function($model) {
+                return $this->repeat !== 'no';
+            }],
+            [['date', 'dateFinish'], function(){
+                if (strtotime($this->date) >= strtotime($this->dateFinish)) {
+                    $this->addErrors(['date', 'dateFinish'], 'Дата окончания должна быть больше даты начала.');
+                } else {
+                    switch ($this->repeat) {
+                        case 'daily':
+                            $period = 1;
+                            break;
+                        case 'second':
+                            $period = 2;
+                            break;
+                        case 'weekpart':
+                            $dateDay = Yii::createObject([
+                                'class' => Day::class,
+                                'component' => DayComponent::class,
+                                'day' => $this->date
+                            ]);;
+                            $period = (($dateDay->component->isWeekend($dateDay)) ? 7/2 : 7/5);
+                            break;
+                        case 'weekly':
+                            $period = 7;
+                            break;
+                        case 'monthly':
+                            $period = 30;
+                            break;
+                        case 'yearly':
+                            $period = 365;
+                            break;
+                    }
+                    $repeats = floor(abs(strtotime($this->dateFinish) - strtotime($this->date)) / 86400) / $period;
+                    if ($repeats > 1000) {
+                        $this->addErrors(['date', 'dateFinish'], 'Количество повторений события не должно быть больше 1000');
+                    }
                 }
-            }, 'enableAjaxValidation' => true,'enableClientValidation' => false],
-            ['files', 'file', 'skipOnEmpty' => false, 'extensions' => ['jpg', 'png'], 'maxFiles' => 10, 'checkExtensionByMimeType'=>false],
+            }, 'when' => function($model) {
+                return $this->repeat !== 'no';
+            }],
+            ['files', 'file', 'extensions' => ['jpg', 'png'], 'maxFiles' => 10, 'checkExtensionByMimeType' => false]
         ];
+    }
+
+    public function checkDate() {
+        $this->addError('date', 'Значение: '.$this->date);
     }
 
     public function attributeLabels()

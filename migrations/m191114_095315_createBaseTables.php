@@ -29,7 +29,7 @@ class m191114_095315_createBaseTables extends Migration
             'timeFinish'=>$this->dateTime()->notNull(),
             'isBlocked'=>$this->boolean()->notNull()->defaultValue(0),
             'createdAt'=>$this->timestamp()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
-            'files'=>$this->text()->defaultValue('a:0:{}'),
+            'files'=>$this->text(),
             'userID'=>$this->integer()->notNull()
         ]);
         $this->createIndex('userLoginUniqueInd','users','login',true);
@@ -42,9 +42,11 @@ class m191114_095315_createBaseTables extends Migration
      */
     public function safeDown()
     {
-        $this->dropIndex('emailUniqueInd', 'users');
-        $this->dropTable('users');
+        $this->dropForeignKey('activityUSerFK', 'activity');
+        $this->dropIndex('userEmailUniqueInd', 'users');
+        $this->dropIndex('userLoginUniqueInd', 'users');
         $this->dropTable('activity');
+        $this->dropTable('users');
     }
 
     /*

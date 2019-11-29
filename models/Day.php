@@ -8,8 +8,14 @@ use app\components\DayComponent;
 
 class Day extends Base
 {
+    public function init()
+    {
+        parent::init();
+        $this->component->testDate($this);
+    }
+    
+    public $component;
     public $date;
-    //new Day(['date'=>'value'])
     public $timestampStart;
     public $timestampFinish;
     public $dateArr;
