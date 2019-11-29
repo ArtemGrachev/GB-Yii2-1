@@ -53,6 +53,10 @@ class DayComponent extends BaseComponent
      * @throws \yii\base\Exception
      */
     private function testDate (Day $day) {
+        $string = 'April 15, 2003';
+        $pattern = '/(\w+) (\d+), (\d+)/i';
+        $replacement = '${1}1,$3';
+        $day->date = preg_replace('/(\w+) (\d+), (\d+)/i', $replacement, $day->date);
         if (!preg_match('/^\d{2}\.\d{2}\.\d{4}$/', $day->date)) {
             throw new \yii\base\Exception( "Дата должна быть в формате дд.мм.гггг (".$day->date.")." );
         } elseif (!strtotime($day->date)) {
